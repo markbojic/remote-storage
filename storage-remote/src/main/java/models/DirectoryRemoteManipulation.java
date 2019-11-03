@@ -26,6 +26,11 @@ import users.User;
 
 public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
+	
+	/*
+	 * (non-Javadoc)
+	 * @see specs.DirectoryManipulation#createDirectory(java.lang.String, java.lang.String, users.User)
+	 */
 	@Override
 	public void createDirectory(String name, String path, User user) {
 		if (user.getPrivileges()[0]) {
@@ -43,6 +48,10 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see specs.DirectoryManipulation#deleteDirectory(java.lang.String, users.User)
+	 */
 	@Override
 	public void deleteDirectory(String path, User user) {
 		if (user.getPrivileges()[1]) {
@@ -61,60 +70,56 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	}
 
-	private ArrayList<String> allFiles = new ArrayList<String>();
-	private ArrayList<String> fileNames = new ArrayList<String>();
 
+	/*
+	 * (non-Javadoc)
+	 * @see specs.DirectoryManipulation#uploadDirectory(java.lang.String, java.lang.String, users.User)
+	 */
 	@Override
 	public void uploadDirectory(String selectedPath, String destinationPath, User user) {
 		if (user.getPrivileges()[2]) {
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 
-			populateDirectoryFilesLists(selectedPath);
-			String[] splitter = selectedPath.split("/");
-			String directoryName = splitter[splitter.length - 1];
-			System.out.println(splitter[0] + "   ");
-			createDirectory(directoryName, destinationPath, user);
-			String directoryPath = (destinationPath + "/" + directoryName);// Path za novi direktorijum
+			File local = new File(selectedPath);
 
-			for (int i = 0; i < allFiles.size(); i++) {
-				try (InputStream in = new FileInputStream(allFiles.get(i))) {
-					FileMetadata metadata = client.files().uploadBuilder(directoryPath + "/" + fileNames.get(i))
-							.uploadAndFinish(in);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			String cale = null;
+
+			try {
+				client.files().createFolderV2(destinationPath + "/" + local.getName());
+				cale = destinationPath + "/" + local.getName();// F1
+				System.out.println("Added folder " + cale);
+			} catch (CreateFolderErrorException e1) {
+				e1.printStackTrace();
+			} catch (DbxException e1) {
+				e1.printStackTrace();
 			}
-		} else {
-			System.out.println("User does not have required privilage.");
-		}
 
-	}
+			File[] directoryListing = local.listFiles();
+			if (directoryListing != null) {
+				for (File child : directoryListing) {
+					if (child.isFile()) {
 
-	private void populateDirectoryFilesLists(String directoryPath) {
-		File dir = new File(directoryPath);
-		File[] directoryListing = dir.listFiles();
-		if (directoryListing != null) {
-			for (File child : directoryListing) {
-				if (child.isFile()) {
-					allFiles.add(child.getAbsolutePath());
-					fileNames.add(child.getName());
-					System.out.println("Added " + child.getName());
-				} else {
-					if (child.isDirectory()) {
-						System.out.println("Found directory -> " + child.getName());
-						populateDirectoryFilesLists(child.getAbsolutePath());
-
+						try (InputStream in = new FileInputStream(child)) {
+							FileMetadata metadata = client.files().uploadBuilder(cale + "/" + child.getName())
+									.uploadAndFinish(in);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						System.out.println("Added " + child.getName());
+					} else {
+						uploadDirectory(child.getAbsolutePath(), cale, user);
 					}
 				}
 			}
-		} else {
-			// Handle the case where dir is not really a directory.
-			// Checking dir.isDirectory() above would not be sufficient
-			// to avoid race conditions with another process that deletes
-			// directories.
 		}
+
 	}
 
+
+	/*
+	 * (non-Javadoc)
+	 * @see specs.DirectoryManipulation#downloadDirectory(java.lang.String, java.lang.String, users.User)
+	 */
 	@Override
 	public void downloadDirectory(String selectedPath, String destinationPath, User user) {
 		if (user.getPrivileges()[3]) {
@@ -140,6 +145,10 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see specs.DirectoryManipulation#listAllFiles(java.lang.String)
+	 */
 	@Override
 	public void listAllFiles(String path) {
 		DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
@@ -163,6 +172,10 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see specs.DirectoryManipulation#listFiles(java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void listFiles(String path, String extension) {
 		DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
@@ -172,7 +185,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			while (true) {
 				for (Metadata metadata : result.getEntries()) {
 					String[] splitter = metadata.getName().split("[.]");
-					if(splitter[splitter.length - 1].equalsIgnoreCase(extension))//Listaj samo ako sadrzi ekstenziju
+					if (splitter[splitter.length - 1].equalsIgnoreCase(extension))// Listaj samo ako sadrzi ekstenziju
 						System.out.println("->>" + metadata.getPathDisplay());
 				}
 				if (!result.getHasMore()) {
@@ -186,9 +199,12 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			e.printStackTrace();
 		}
 
-
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see specs.DirectoryManipulation#listDirectories(java.lang.String)
+	 */
 	@Override
 	public void listDirectories(String path) {
 		DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
@@ -197,8 +213,8 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			result = client.files().listFolder(path);
 			while (true) {
 				for (Metadata metadata : result.getEntries()) {
-						if(metadata instanceof FolderMetadata)
-							System.out.println("->>>" + metadata.getPathDisplay());
+					if (metadata instanceof FolderMetadata)
+						System.out.println("->>>" + metadata.getPathDisplay());
 				}
 				if (!result.getHasMore()) {
 					break;
