@@ -1,11 +1,16 @@
 package models;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
@@ -18,6 +23,7 @@ import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.UploadErrorException;
 
 import main.App;
 import main.SdkUtil;
@@ -26,10 +32,26 @@ import users.User;
 
 public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
+	/*
+	 * @param root
+	 */
+	private String root;
 	
+	
+	
+	public String getRoot() {
+		return root;
+	}
+
+	public void setRoot(String root) {
+		this.root = root;
+	}
+
 	/*
 	 * (non-Javadoc)
-	 * @see specs.DirectoryManipulation#createDirectory(java.lang.String, java.lang.String, users.User)
+	 * 
+	 * @see specs.DirectoryManipulation#createDirectory(java.lang.String,
+	 * java.lang.String, users.User)
 	 */
 	@Override
 	public void createDirectory(String name, String path, User user) {
@@ -50,15 +72,18 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	/*
 	 * (non-Javadoc)
-	 * @see specs.DirectoryManipulation#deleteDirectory(java.lang.String, users.User)
+	 * 
+	 * @see specs.DirectoryManipulation#deleteDirectory(java.lang.String,
+	 * users.User)
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void deleteDirectory(String path, User user) {
 		if (user.getPrivileges()[1]) {
 
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 			try {
-				client.files().delete("/" + path);
+				client.files().delete(path);
 			} catch (CreateFolderErrorException e1) {
 				e1.printStackTrace();
 			} catch (DbxException e1) {
@@ -70,10 +95,11 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	}
 
-
 	/*
 	 * (non-Javadoc)
-	 * @see specs.DirectoryManipulation#uploadDirectory(java.lang.String, java.lang.String, users.User)
+	 * 
+	 * @see specs.DirectoryManipulation#uploadDirectory(java.lang.String,
+	 * java.lang.String, users.User)
 	 */
 	@Override
 	public void uploadDirectory(String selectedPath, String destinationPath, User user) {
@@ -115,10 +141,11 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	}
 
-
 	/*
 	 * (non-Javadoc)
-	 * @see specs.DirectoryManipulation#downloadDirectory(java.lang.String, java.lang.String, users.User)
+	 * 
+	 * @see specs.DirectoryManipulation#downloadDirectory(java.lang.String,
+	 * java.lang.String, users.User)
 	 */
 	@Override
 	public void downloadDirectory(String selectedPath, String destinationPath, User user) {
@@ -127,7 +154,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 			DbxDownloader<DownloadZipResult> dw = null;
 			try {
-				dw = client.files().downloadZip("/" + selectedPath); // Bira koji diretorijum skida
+				dw = client.files().downloadZip(selectedPath); // Bira koji diretorijum skida
 				String[] splitter = selectedPath.split("/");
 				String fileName = splitter[splitter.length - 1];
 				FileOutputStream out1 = new FileOutputStream(destinationPath + "/" + fileName + ".zip");// Gde se skida
@@ -139,14 +166,13 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else {
-			System.out.println("User does not have required privilage.");
 		}
 
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see specs.DirectoryManipulation#listAllFiles(java.lang.String)
 	 */
 	@Override
@@ -174,7 +200,9 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	/*
 	 * (non-Javadoc)
-	 * @see specs.DirectoryManipulation#listFiles(java.lang.String, java.lang.String)
+	 * 
+	 * @see specs.DirectoryManipulation#listFiles(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public void listFiles(String path, String extension) {
@@ -203,6 +231,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see specs.DirectoryManipulation#listDirectories(java.lang.String)
 	 */
 	@Override
@@ -226,6 +255,70 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		} catch (DbxException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	public void initStorage(String path, String storageName, String[] forbiddenExtensions, User user) {
+		
+		createDirectory(storageName, path, user);//Korisnik mora da ima pristu kreiranju direktorijuma
+		setRoot(path + File.separator + storageName);
+		
+		user.setAdmin(true);
+		
+		File fileInfo = new File("src/storage-info.txt");
+		try {
+			FileOutputStream fos = new FileOutputStream(fileInfo, true);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+			bw.write(user.getUsername());
+			bw.newLine();
+			for (int i = 0 ; i < forbiddenExtensions.length ; i++) {
+				bw.write(forbiddenExtensions[i]);
+				bw.newLine();
+			}
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
+
+		try (InputStream in = new FileInputStream(fileInfo.getAbsolutePath())) {
+			String name = fileInfo.getName();
+			FileMetadata metadata = client.files().uploadBuilder(path + "/" + name).uploadAndFinish(in);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			Files.deleteIfExists(Paths.get(fileInfo.getAbsolutePath()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		File fileAccs = new File("src/accounts.log");
+		try {
+			FileOutputStream fos = new FileOutputStream(fileAccs, true);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+			bw.write(user.getUsername() + "/" + user.getPassword() + "/" + true + "/" + true + "/" + true + "/" + true);
+			bw.newLine();
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		try (InputStream in = new FileInputStream(fileAccs.getAbsolutePath())) {
+			String name = fileAccs.getName();
+			FileMetadata metadata = client.files().uploadBuilder(path + "/" + name).uploadAndFinish(in);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			Files.deleteIfExists(Paths.get(fileAccs.getAbsolutePath()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 }

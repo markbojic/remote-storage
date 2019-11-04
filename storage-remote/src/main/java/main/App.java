@@ -19,6 +19,7 @@ import com.dropbox.core.v2.files.DownloadZipResult;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.users.FullAccount;
 
 import models.DirectoryRemoteManipulation;
@@ -51,7 +52,9 @@ public class App {
 
 		DirectoryRemoteManipulation m = new DirectoryRemoteManipulation();
 		FileRemoteManipulation f = new FileRemoteManipulation();
-		boolean[] b = { true, true, true, true, true, true, true };
+		boolean[] b = { true, true, true, true};
+
+		// move("/Test.txt", "/PFFF.txt");
 		// TEST ZA KREIRANJE NOVOG
 		// DIREKTORIJUMA***********************************************************
 		// RADI!
@@ -61,7 +64,7 @@ public class App {
 		// TEST ZA BRISANJE
 		// DIREKTORIJUMA******************************************************************
 		// RADI!
-		// m.deleteDirectory("test.txt", new User("A", "A", b));
+		// m.deleteDirectory("/New Folder", new User("A", "A", b));
 
 		// TEST ZA UPLOADOVANJE
 		// DIREKTORIJUMA**************************************************************
@@ -70,7 +73,7 @@ public class App {
 
 		// TEST ZA DOWNLOADOVANJE DIREKTORIJUMA**************************************
 		// RADI!
-		// m.downloadDirectory("New Folder", "C:/DB Download", new User("A", "A", b));
+		// m.downloadDirectory("/New Folder", "C:/DD", new User("A", "A", b));
 
 		// TEST ZA LISTANJE SVIH FAJLOVA********************************* RADI!
 		// m.listAllFiles("");
@@ -81,27 +84,54 @@ public class App {
 		// TEST ZA LISTANJE DIREKTORIJUMA ************************************ RADI!
 		// m.listDirectories("");
 
-		//String directoryPath = "C:/New Folder";
-		
-		//TEST ZA UPLOAD DIRECTORY FULL*******************************************RADI!
-		//uploadD(directoryPath, "");
-		
-		//TEST ZA CREATE FAJL **********************************************RADI!
-		//f.createFile("Novi.zip", "/Test", new User("A", "A", b));
-		
-		//TEST ZA DELETE FILE*********************************************RADI!
-		//f.deleteFile("/test.txt", new User("A", "a", b));
-		
-		//TEST ZA UPLOAD FAJLOVA *************************************RADI!
-		//f.uploadFile("C:/New Folder/Test1.txt", "/New Folder", new User("A", "A", b));
-		
-		
-		//TEST ZA DOWNLOAD *************************************** RADI!
-		//f.downloadFile("/OutputFile.json", "C:/New Folder", new User("A", "A", b));
-		
-		//m.uploadDirectory(directoryPath, "", new User("A", "A", b));
+		// String directoryPath = "C:/New Folder";
 
+		// TEST ZA UPLOAD DIRECTORY FULL*******************************************RADI!
+		// m.uploadDirectory("C:/New Folder 1", "", new User("A", "A", b));
+
+		// TEST ZA CREATE FAJL **********************************************RADI!
+		// f.createFile("Novi.zip", "/Test", new User("A", "A", b));
+
+		// TEST ZA DELETE FILE*********************************************RADI!
+		// f.deleteFile("/test.txt", new User("A", "a", b));
+
+		// TEST ZA UPLOAD FAJLOVA *************************************RADI!
+		// f.uploadFile("C:/New Folder/Test1.txt", "/New Folder", new User("A", "A",
+		// b));
+
+		// TEST ZA DOWNLOAD *************************************** RADI!
+		// f.downloadFile("/OutputFile.json", "C:/New Folder", new User("A", "A", b));
+
+		// m.uploadDirectory(directoryPath, "", new User("A", "A", b));
+
+		//m.createDirectory("Folder", "", new User("A", "AA", b));
+		//f.createMetaFile(new User("A", "A", b), "JTest.txt", "txt", "/New Folder");
+		
+		//f.uploadFile("C:/New Folder/Test.txt", "", new User("A", "AA", b));
+		
+		//f.deleteFile("/Test.txt", new User("A", "AA", b));
+		String[] ext = {"rar"};
+		
+		//m.initStorage("", "Remote Storage", ext, new User("C", "ASS", b));
+		
+		User u = new User("C", "ASS", b);
+		u.setAdmin(true);
+		m.initStorage("", "Remote Storage", ext, u);
+		//u.createUser("NOVI", "A", b, m.getRoot());
+		
+		//System.out.println(m.getRoot());
 	}
 
+	private static void move(String path, String dest) {
+		DbxClientV2 client = SdkUtil.createTestDbxClientV2(ACCESS_TOKEN);
+
+		try {
+			Metadata metadata = client.files().move(path, dest);
+		} catch (RelocationErrorException e) {
+			e.printStackTrace();
+		} catch (DbxException e) {
+			e.printStackTrace();
+		}
+	}
 
 }
