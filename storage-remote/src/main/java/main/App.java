@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import com.dropbox.core.DbxDownloader;
@@ -51,7 +52,7 @@ public class App {
 		 */
 
 		DirectoryRemoteManipulation m = new DirectoryRemoteManipulation();
-		FileRemoteManipulation f = new FileRemoteManipulation();
+		
 		boolean[] b = { true, true, true, true};
 
 		// move("/Test.txt", "/PFFF.txt");
@@ -116,10 +117,36 @@ public class App {
 		
 		User u = new User("C", "ASS", b);
 		u.setAdmin(true);
-		m.initStorage("", "Remote Storage", ext, u);
-		//u.createUser("NOVI", "A", b, m.getRoot());
+		m.initStorage("Remote Storage", ext, u);
+		FileRemoteManipulation f = new FileRemoteManipulation(m.getRoot());
 		
+		m.downloadDirectory("New Folder", "C:/New Folder 1", u);
+		//m.listDirectories("New Folder");
+	//	m.listFiles("New Folder", "txt");
+		//m.listAllFiles("New Folder");
+		//u.listAllUsers(m.getRoot(), ACCESS_TOKEN);
+		//f.downloadFile("r.txt", "C:/New Folder 1", u);
+		//f.createFile("Mojfajl.txt", "", u);
+		//f.deleteFile("Mojfajl.txt", u);
+		//f.uploadFile("C:/New Folder 1/r.txt", "", u);
+	//	f.rewriteAccountLog("C:/New Folder/accounts.log",m.getRoot());
+	//	System.out.println(m.getRoot());
+		//u.createUser("NOVI", "A", b, m.getRoot(),ACCESS_TOKEN);
+		//u.createUser("Nikola", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
+	//	u.createUser("Nikola2", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
+	//	u.createUser("Nikola3", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
+	//	u.listAllUsers(m.getRoot(), ACCESS_TOKEN);
+		
+	//	m.uploadZipDirectory("C:/New Folder", "", u);
+		//u.deleteUser("Nikola", m.getRoot(), ACCESS_TOKEN);
 		//System.out.println(m.getRoot());
+		
+		//Test za upload zip multiple
+		//ArrayList<String> paths = new ArrayList<String>();
+		//paths.add("C:/New Folder/Test.txt");
+		//paths.add("C:/New Folder 1/r.txt");
+		//f.uploadMultipleFilesZip(paths, "", "Zipperoni", u);
+		
 	}
 
 	private static void move(String path, String dest) {

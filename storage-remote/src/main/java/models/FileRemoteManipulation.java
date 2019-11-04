@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.dropbox.core.DbxException;
@@ -19,14 +20,32 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.WriteMode;
 import com.google.gson.stream.JsonWriter;
 
+import common.FileUtil;
 import main.App;
 import main.SdkUtil;
 import specs.FileManipulation;
 import users.User;
 
 public class FileRemoteManipulation implements FileManipulation {
+
+	private String root;
+
+	public FileRemoteManipulation(String root) {
+		super();
+		this.root = root;
+		this.setRoot(root);
+	}
+
+	public String getRoot() {
+		return root;
+	}
+
+	public void setRoot(String root) {
+		this.root = root;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -44,7 +63,7 @@ public class FileRemoteManipulation implements FileManipulation {
 
 			int i = c.getName().lastIndexOf('.');
 			if (i > 0) {
-			    extension = c.getName().substring(i+1);
+				extension = c.getName().substring(i + 1);
 			}
 			try {
 				c.createNewFile();
@@ -54,9 +73,14 @@ public class FileRemoteManipulation implements FileManipulation {
 			try {
 
 				try (InputStream in = new FileInputStream(c)) {
-					@SuppressWarnings("unused")
-					FileMetadata metadata = client.files().uploadBuilder(path + "/" + name).uploadAndFinish(in);
-					createMetaFile(user, name, extension, path);
+					if (!path.equalsIgnoreCase("")) {
+						FileMetadata metadata = client.files().uploadBuilder(root + "/" + path + "/" + name)
+								.uploadAndFinish(in);
+						createMetaFile(user, name, extension, root + "/" + path);
+					} else {
+						FileMetadata metadata = client.files().uploadBuilder(root + "/" + name).uploadAndFinish(in);
+						createMetaFile(user, name, extension, root);
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -86,15 +110,15 @@ public class FileRemoteManipulation implements FileManipulation {
 
 			try {
 				@SuppressWarnings({ "unused", "deprecation" })
-				Metadata metadata = client.files().delete(path);
-				String metaPath = path.substring(0, path.lastIndexOf(".")) + "-meta.json";
+				Metadata metadata = client.files().delete(root + "/" + path);
+				String metaPath = root + "/" + path.substring(0, path.lastIndexOf(".")) + "-meta.json";
 				System.out.println(metaPath);
 				client.files().delete(metaPath);
 			} catch (DeleteErrorException e) {
 				e.printStackTrace();
 			} catch (DbxException e) {
 				e.printStackTrace();
-			} 
+			}
 		} else {
 			System.out.println("User does not have required privilage.");
 		}
@@ -119,10 +143,16 @@ public class FileRemoteManipulation implements FileManipulation {
 				String extension = "";
 				int i = f.getName().lastIndexOf('.');
 				if (i > 0) {
-				    extension = f.getName().substring(i+1);
+					extension = f.getName().substring(i + 1);
 				}
-				FileMetadata metadata = client.files().uploadBuilder(destinationPath + "/" + name).uploadAndFinish(in);
-				createMetaFile(user, name, extension, destinationPath);
+				if (!destinationPath.equalsIgnoreCase("")) {
+					FileMetadata metadata = client.files().uploadBuilder(root + "/" + destinationPath + "/" + name)
+							.uploadAndFinish(in);
+					createMetaFile(user, name, extension, root + "/" + destinationPath);
+				} else {
+					FileMetadata metadata = client.files().uploadBuilder(root + "/" + name).uploadAndFinish(in);
+					createMetaFile(user, name, extension, root);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -154,7 +184,7 @@ public class FileRemoteManipulation implements FileManipulation {
 				bout = new BufferedOutputStream(out);
 				try {
 
-					FileMetadata metadata = client.files().downloadBuilder(selectedPath).download(bout);
+					FileMetadata metadata = client.files().downloadBuilder(root + "/" + selectedPath).download(bout);
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -222,5 +252,26 @@ public class FileRemoteManipulation implements FileManipulation {
 		}
 
 	}
-	
+
+	@SuppressWarnings("static-access")
+	@Override
+	public void uploadMultipleFilesZip(ArrayList<String> filePaths, String destinationPath, String zipName, User user) {
+		FileUtil util = new FileUtil();
+		Object[] array = filePaths.toArray();
+		String[] ar = new String[filePaths.size()];
+
+		for (int i = 0; i < array.length; i++) {
+			ar[i] = array[i].toString();
+			System.out.println(ar[i]);
+		}
+
+		util.zipFiles(ar, "src", zipName);
+		System.out.println(root + destinationPath);
+		uploadFile("src/" + zipName + ".zip", destinationPath, user);
+		try {
+			Files.deleteIfExists(Paths.get("src/" + zipName + ".zip"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

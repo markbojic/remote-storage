@@ -25,6 +25,7 @@ import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.UploadErrorException;
 
+import common.FileUtil;
 import main.App;
 import main.SdkUtil;
 import specs.DirectoryManipulation;
@@ -38,7 +39,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 	private String root;
 	
 	
-	
+
 	public String getRoot() {
 		return root;
 	}
@@ -154,7 +155,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 			DbxDownloader<DownloadZipResult> dw = null;
 			try {
-				dw = client.files().downloadZip(selectedPath); // Bira koji diretorijum skida
+				dw = client.files().downloadZip(root + "/" + selectedPath); // Bira koji diretorijum skida
 				String[] splitter = selectedPath.split("/");
 				String fileName = splitter[splitter.length - 1];
 				FileOutputStream out1 = new FileOutputStream(destinationPath + "/" + fileName + ".zip");// Gde se skida
@@ -180,7 +181,10 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 		ListFolderResult result;
 		try {
-			result = client.files().listFolder(path);
+			if(path.equalsIgnoreCase(""))
+				result = client.files().listFolder(root);
+			else
+				result = client.files().listFolder(root + "/" + path);
 			while (true) {
 				for (Metadata metadata : result.getEntries()) {
 					System.out.println("->" + metadata.getName());
@@ -209,7 +213,10 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 		ListFolderResult result;
 		try {
-			result = client.files().listFolder(path);
+			if(path.equalsIgnoreCase(""))
+				result = client.files().listFolder(root);
+			else
+				result = client.files().listFolder(root + "/" + path);
 			while (true) {
 				for (Metadata metadata : result.getEntries()) {
 					String[] splitter = metadata.getName().split("[.]");
@@ -239,7 +246,10 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 		ListFolderResult result;
 		try {
-			result = client.files().listFolder(path);
+			if(path.equalsIgnoreCase(""))
+				result = client.files().listFolder(root);
+			else
+				result = client.files().listFolder(root + "/" + path);
 			while (true) {
 				for (Metadata metadata : result.getEntries()) {
 					if (metadata instanceof FolderMetadata)
@@ -256,22 +266,58 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	public void initStorage(String path, String storageName, String[] forbiddenExtensions, User user) {
-		
-		createDirectory(storageName, path, user);//Korisnik mora da ima pristu kreiranju direktorijuma
-		setRoot(path + File.separator + storageName);
-		
+
+	/**
+	 * 
+	 * @param storageName         name of the storage you want to access
+	 * @param forbiddenExtensions extension that cannot be used in the selected
+	 *                            storage
+	 * @param user                User who accesses the storage with the given name
+	 * 
+	 *                            The method creates new Storage if a storage with
+	 *                            such name does not exist, otherwise the root field
+	 *                            will be set to the value of the wanted storage
+	 *                            with the given storage name
+	 */
+	@SuppressWarnings("unused")
+	public void initStorage(String storageName, String[] forbiddenExtensions, User user) {
+
+		DbxClientV2 client1 = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
+		ListFolderResult result;
+		try {
+			result = client1.files().listFolder("");
+			while (true) {
+				for (Metadata metadata : result.getEntries()) {
+					if (metadata instanceof FolderMetadata)
+						if (metadata.getName().equalsIgnoreCase(storageName)) {
+							System.out.println("Storage vec postoji!");
+							setRoot("" + "/" + storageName);
+							return;
+						}
+				}
+				if (!result.getHasMore()) {
+					break;
+				}
+				result = client1.files().listFolderContinue(result.getCursor());
+			}
+		} catch (ListFolderErrorException e) {
+			e.printStackTrace();
+		} catch (DbxException e) {
+			e.printStackTrace();
+		}
+
+		createDirectory(storageName, "", user);// Korisnik mora da ima pristu kreiranju direktorijuma
+		setRoot("" + "/" + storageName);
+		System.out.println(getRoot());
 		user.setAdmin(true);
-		
+
 		File fileInfo = new File("src/storage-info.txt");
 		try {
 			FileOutputStream fos = new FileOutputStream(fileInfo, true);
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 			bw.write(user.getUsername());
 			bw.newLine();
-			for (int i = 0 ; i < forbiddenExtensions.length ; i++) {
+			for (int i = 0; i < forbiddenExtensions.length; i++) {
 				bw.write(forbiddenExtensions[i]);
 				bw.newLine();
 			}
@@ -279,22 +325,22 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 
 		try (InputStream in = new FileInputStream(fileInfo.getAbsolutePath())) {
 			String name = fileInfo.getName();
-			FileMetadata metadata = client.files().uploadBuilder(path + "/" + name).uploadAndFinish(in);
+			FileMetadata metadata = client.files().uploadBuilder(getRoot() + "/" + name).uploadAndFinish(in);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		try {
 			Files.deleteIfExists(Paths.get(fileInfo.getAbsolutePath()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		File fileAccs = new File("src/accounts.log");
 		try {
 			FileOutputStream fos = new FileOutputStream(fileAccs, true);
@@ -305,16 +351,34 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		try (InputStream in = new FileInputStream(fileAccs.getAbsolutePath())) {
 			String name = fileAccs.getName();
-			FileMetadata metadata = client.files().uploadBuilder(path + "/" + name).uploadAndFinish(in);
+			FileMetadata metadata = client.files().uploadBuilder(getRoot() + "/" + name).uploadAndFinish(in);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		try {
 			Files.deleteIfExists(Paths.get(fileAccs.getAbsolutePath()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@SuppressWarnings("static-access")
+	@Override
+	public void uploadZipDirectory(String path, String destination, User user) {
+
+		FileUtil util = new FileUtil();
+		String splitter[] = path.split("/");
+		String name = splitter[splitter.length - 1];
+		util.zipDirectory(new File(path), "src", name);
+		FileRemoteManipulation fr = new FileRemoteManipulation(getRoot());
+		fr.uploadFile("src/" + name + ".zip", destination, user);
+		try {
+			Files.deleteIfExists(Paths.get("src/" + name + ".zip"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
