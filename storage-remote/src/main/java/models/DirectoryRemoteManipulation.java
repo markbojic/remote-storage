@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -60,7 +61,13 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 			try {
-				client.files().createFolderV2(path + "/" + name);
+				if(!path.equalsIgnoreCase("")) {
+					client.files().createFolderV2(root + "/" + path + "/" + name);
+				}
+				else
+				{
+					client.files().createFolderV2(root + "/" + name);
+				}
 			} catch (CreateFolderErrorException e1) {
 				e1.printStackTrace();
 			} catch (DbxException e1) {
@@ -84,7 +91,8 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 			try {
-				client.files().delete(path);
+				if(!path.equalsIgnoreCase(""))
+					client.files().delete(root + "/" + path);
 			} catch (CreateFolderErrorException e1) {
 				e1.printStackTrace();
 			} catch (DbxException e1) {
@@ -112,8 +120,15 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			String cale = null;
 
 			try {
+				if(!destinationPath.equals("")){
 				client.files().createFolderV2(destinationPath + "/" + local.getName());
 				cale = destinationPath + "/" + local.getName();// F1
+				}
+				else
+				{
+					client.files().createFolderV2(root + "/" + local.getName());
+					cale = root + "/" + local.getName();// F1
+				}
 				System.out.println("Added folder " + cale);
 			} catch (CreateFolderErrorException e1) {
 				e1.printStackTrace();
@@ -129,6 +144,9 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 						try (InputStream in = new FileInputStream(child)) {
 							FileMetadata metadata = client.files().uploadBuilder(cale + "/" + child.getName())
 									.uploadAndFinish(in);
+							FileRemoteManipulation fr = new FileRemoteManipulation();
+							fr.setRoot(root);
+							fr.createMetaFile(user, child.getName(), "b", cale);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -306,9 +324,13 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			e.printStackTrace();
 		}
 
-		createDirectory(storageName, "", user);// Korisnik mora da ima pristu kreiranju direktorijuma
+		try {
+			client1.files().createFolderV2("" + "/" + storageName);
+		} catch (DbxException e1) {
+			e1.printStackTrace();
+		}
+		//createDirectory(storageName, "", user);// Korisnik mora da ima pristu kreiranju direktorijuma
 		setRoot("" + "/" + storageName);
-		System.out.println(getRoot());
 		user.setAdmin(true);
 
 		File fileInfo = new File("src/storage-info.txt");
@@ -348,6 +370,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			bw.write(user.getUsername() + "/" + user.getPassword() + "/" + true + "/" + true + "/" + true + "/" + true);
 			bw.newLine();
 			bw.close();
+			fos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -355,16 +378,20 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		try (InputStream in = new FileInputStream(fileAccs.getAbsolutePath())) {
 			String name = fileAccs.getName();
 			FileMetadata metadata = client.files().uploadBuilder(getRoot() + "/" + name).uploadAndFinish(in);
+			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		PrintWriter writer;
 		try {
-			Files.deleteIfExists(Paths.get(fileAccs.getAbsolutePath()));
-		} catch (IOException e) {
+			writer = new PrintWriter(fileAccs);
+			writer.print("");
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 	}
 
 	@SuppressWarnings("static-access")
@@ -375,7 +402,8 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 		String splitter[] = path.split("/");
 		String name = splitter[splitter.length - 1];
 		util.zipDirectory(new File(path), "src", name);
-		FileRemoteManipulation fr = new FileRemoteManipulation(getRoot());
+		FileRemoteManipulation fr = new FileRemoteManipulation();
+		fr.setRoot(root);
 		fr.uploadFile("src/" + name + ".zip", destination, user);
 		try {
 			Files.deleteIfExists(Paths.get("src/" + name + ".zip"));

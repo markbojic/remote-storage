@@ -33,10 +33,18 @@ public class FileRemoteManipulation implements FileManipulation {
 
 	private String root;
 
-	public FileRemoteManipulation(String root) {
+	private String[] forbiddenExtensions;
+	
+	public String[] getForbiddenExtensions() {
+		return forbiddenExtensions;
+	}
+
+	public void setForbiddenExtensions(String[] forbiddenExtensions) {
+		this.forbiddenExtensions = forbiddenExtensions;
+	}
+
+	public FileRemoteManipulation() {
 		super();
-		this.root = root;
-		this.setRoot(root);
 	}
 
 	public String getRoot() {

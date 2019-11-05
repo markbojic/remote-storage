@@ -118,7 +118,8 @@ public class App {
 		User u = new User("C", "ASS", b);
 		u.setAdmin(true);
 		m.initStorage("Remote Storage", ext, u);
-		FileRemoteManipulation f = new FileRemoteManipulation(m.getRoot());
+		FileRemoteManipulation f = new FileRemoteManipulation();
+		//f.setForbiddenExtensions("");
 		
 		m.downloadDirectory("New Folder", "C:/New Folder 1", u);
 		//m.listDirectories("New Folder");
