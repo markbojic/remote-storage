@@ -12,7 +12,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 import com.dropbox.core.DbxException;
@@ -29,6 +28,7 @@ import main.SdkUtil;
 import specs.FileManipulation;
 import users.User;
 
+@SuppressWarnings("unused")
 public class FileRemoteManipulation implements FileManipulation {
 
 	private String root;
@@ -110,6 +110,7 @@ public class FileRemoteManipulation implements FileManipulation {
 	 * 
 	 * @see specs.FileManipulation#deleteFile(java.lang.String, users.User)
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void deleteFile(String path, User user) {
 		if (user.getPrivileges()[1]) {
@@ -117,7 +118,6 @@ public class FileRemoteManipulation implements FileManipulation {
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 
 			try {
-				@SuppressWarnings({ "unused", "deprecation" })
 				Metadata metadata = client.files().delete(root + "/" + path);
 				String metaPath = root + "/" + path.substring(0, path.lastIndexOf(".")) + "-meta.json";
 				System.out.println(metaPath);
@@ -176,7 +176,6 @@ public class FileRemoteManipulation implements FileManipulation {
 	 * @see specs.FileManipulation#downloadFile(java.lang.String, java.lang.String,
 	 * users.User)
 	 */
-	@SuppressWarnings("unused")
 	@Override
 	public void downloadFile(String selectedPath, String destinationPath, User user) {
 		if (user.getPrivileges()[3]) {
@@ -263,17 +262,9 @@ public class FileRemoteManipulation implements FileManipulation {
 
 	@SuppressWarnings("static-access")
 	@Override
-	public void uploadMultipleFilesZip(ArrayList<String> filePaths, String destinationPath, String zipName, User user) {
+	public void uploadMultipleFilesZip(String[] filePaths, String destinationPath, String zipName, User user) {
 		FileUtil util = new FileUtil();
-		Object[] array = filePaths.toArray();
-		String[] ar = new String[filePaths.size()];
-
-		for (int i = 0; i < array.length; i++) {
-			ar[i] = array[i].toString();
-			System.out.println(ar[i]);
-		}
-
-		util.zipFiles(ar, "src", zipName);
+		util.zipFiles(filePaths, "src", zipName);
 		System.out.println(root + destinationPath);
 		uploadFile("src/" + zipName + ".zip", destinationPath, user);
 		try {

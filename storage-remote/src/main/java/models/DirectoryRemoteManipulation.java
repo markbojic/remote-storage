@@ -32,6 +32,7 @@ import main.SdkUtil;
 import specs.DirectoryManipulation;
 import users.User;
 
+@SuppressWarnings("unused")
 public class DirectoryRemoteManipulation implements DirectoryManipulation {
 
 	/*
@@ -297,7 +298,6 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 	 *                            will be set to the value of the wanted storage
 	 *                            with the given storage name
 	 */
-	@SuppressWarnings("unused")
 	public void initStorage(String storageName, String[] forbiddenExtensions, User user) {
 
 		DbxClientV2 client1 = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
@@ -388,7 +388,6 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 			writer.print("");
 			writer.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
