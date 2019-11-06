@@ -70,7 +70,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 					client.files().createFolderV2(root + "/" + name);
 				}
 			} catch (CreateFolderErrorException e1) {
-				e1.printStackTrace();
+				System.out.println("Wrong path!");
 			} catch (DbxException e1) {
 				e1.printStackTrace();
 			}
@@ -158,6 +158,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 				}
 			}
 		}
+		System.out.println("User does not have required privilage!");
 
 	}
 
@@ -184,9 +185,10 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 				bout.close();
 				out1.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.out.println("Invalid path parameter!");
 			}
 		}
+		System.out.println("User does not have required privilage!");
 
 	}
 
@@ -214,7 +216,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 				result = client.files().listFolderContinue(result.getCursor());
 			}
 		} catch (ListFolderErrorException e) {
-			e.printStackTrace();
+			System.out.println("Wrong path!");
 		} catch (DbxException e) {
 			e.printStackTrace();
 		}
@@ -248,7 +250,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 				result = client.files().listFolderContinue(result.getCursor());
 			}
 		} catch (ListFolderErrorException e) {
-			e.printStackTrace();
+			System.out.println("Wrong path!");
 		} catch (DbxException e) {
 			e.printStackTrace();
 		}
@@ -280,7 +282,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 				result = client.files().listFolderContinue(result.getCursor());
 			}
 		} catch (ListFolderErrorException e) {
-			e.printStackTrace();
+			System.out.println("Wrong path!");
 		} catch (DbxException e) {
 			e.printStackTrace();
 		}
@@ -319,7 +321,7 @@ public class DirectoryRemoteManipulation implements DirectoryManipulation {
 				result = client1.files().listFolderContinue(result.getCursor());
 			}
 		} catch (ListFolderErrorException e) {
-			e.printStackTrace();
+			System.out.println("Wrong path!");
 		} catch (DbxException e) {
 			e.printStackTrace();
 		}

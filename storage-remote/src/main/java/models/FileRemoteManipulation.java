@@ -73,6 +73,13 @@ public class FileRemoteManipulation implements FileManipulation {
 			if (i > 0) {
 				extension = c.getName().substring(i + 1);
 			}
+			for(String s : forbiddenExtensions) {
+				if(s.equalsIgnoreCase(extension))
+				{
+					System.out.println("File with extension  (." + extension + ") cannot be created!" );
+					return;
+				}
+			}
 			try {
 				c.createNewFile();
 			} catch (IOException e1) {
@@ -90,7 +97,7 @@ public class FileRemoteManipulation implements FileManipulation {
 						createMetaFile(user, name, extension, root);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					System.out.println("Wrong path!");
 				}
 			} catch (Exception e) {
 			}
@@ -123,7 +130,7 @@ public class FileRemoteManipulation implements FileManipulation {
 				System.out.println(metaPath);
 				client.files().delete(metaPath);
 			} catch (DeleteErrorException e) {
-				e.printStackTrace();
+				System.out.println("Wrong path!");
 			} catch (DbxException e) {
 				e.printStackTrace();
 			}
@@ -153,6 +160,12 @@ public class FileRemoteManipulation implements FileManipulation {
 				if (i > 0) {
 					extension = f.getName().substring(i + 1);
 				}
+				for(String s : forbiddenExtensions) {
+					if(s.equalsIgnoreCase(extension)) {
+						System.out.println("File with extension (." + extension + ") cannot be uploaded!");
+						return;
+					}
+				}
 				if (!destinationPath.equalsIgnoreCase("")) {
 					FileMetadata metadata = client.files().uploadBuilder(root + "/" + destinationPath + "/" + name)
 							.uploadAndFinish(in);
@@ -162,7 +175,7 @@ public class FileRemoteManipulation implements FileManipulation {
 					createMetaFile(user, name, extension, root);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				System.out.println("Wrong path!");
 			}
 		} else {
 			System.out.println("User does not have required privilage.");
@@ -194,13 +207,11 @@ public class FileRemoteManipulation implements FileManipulation {
 					FileMetadata metadata = client.files().downloadBuilder(root + "/" + selectedPath).download(bout);
 
 				} catch (Exception e) {
-					e.printStackTrace();
+					System.out.println("Wrong path!");
 				} finally {
 					try {
-
 						bout.close();
 						out.close();
-
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
