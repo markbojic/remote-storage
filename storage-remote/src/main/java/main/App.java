@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
@@ -22,11 +21,10 @@ import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.users.FullAccount;
-
-import models.DirectoryRemoteManipulation;
-import models.FileRemoteManipulation;
+import models.DirectoryRemoteImplementation;
+import models.FileRemoteImplementation;
+import models.User;
 import specs.DirectoryManipulation;
-import users.User;
 
 public class App {
 
@@ -51,7 +49,7 @@ public class App {
 		 * result = client.files().listFolderContinue(result.getCursor()); }
 		 */
 
-		DirectoryRemoteManipulation m = new DirectoryRemoteManipulation();
+		DirectoryRemoteImplementation m = new DirectoryRemoteImplementation();
 		
 		boolean[] b = { true, true, true, true};
 
@@ -111,17 +109,21 @@ public class App {
 		//f.uploadFile("C:/New Folder/Test.txt", "", new User("A", "AA", b));
 		
 		//f.deleteFile("/Test.txt", new User("A", "AA", b));
-		String[] ext = {"rar"};
+		//String[] ext = {"rar"};
 		
 		//m.initStorage("", "Remote Storage", ext, new User("C", "ASS", b));
 		
-		User u = new User("C", "ASS", b);
-		u.setAdmin(true);
-		m.initStorage("Remote Storage", ext, u);
-		FileRemoteManipulation f = new FileRemoteManipulation();
+		//User u = new User("C", "ASS");
+		//u.setPrivileges(b);
+		//u.setAdmin(true);
+		//m.initStorage("Remote Storage", ext, u);
+		//FileRemoteManipulation f = new FileRemoteManipulation();
+		//f.setForbiddenExtensions(ext);
+		//f.setRoot(m.getRoot());
+		//m.createDirectory("A", "", u);
 		//f.setForbiddenExtensions("");
 		
-		m.downloadDirectory("New Folder", "C:/New Folder 1", u);
+		//m.downloadDirectory("New Folder", "C:/New Folder 1", u);
 		//m.listDirectories("New Folder");
 	//	m.listFiles("New Folder", "txt");
 		//m.listAllFiles("New Folder");

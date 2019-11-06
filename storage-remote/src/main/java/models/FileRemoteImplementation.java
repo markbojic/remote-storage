@@ -26,15 +26,15 @@ import common.FileUtil;
 import main.App;
 import main.SdkUtil;
 import specs.FileManipulation;
-import users.User;
+import users.AbstractUser;
 
 @SuppressWarnings("unused")
-public class FileRemoteManipulation implements FileManipulation {
+public class FileRemoteImplementation implements FileManipulation {
 
 	private String root;
 
 	private String[] forbiddenExtensions;
-	
+
 	public String[] getForbiddenExtensions() {
 		return forbiddenExtensions;
 	}
@@ -43,7 +43,7 @@ public class FileRemoteManipulation implements FileManipulation {
 		this.forbiddenExtensions = forbiddenExtensions;
 	}
 
-	public FileRemoteManipulation() {
+	public FileRemoteImplementation() {
 		super();
 	}
 
@@ -59,10 +59,10 @@ public class FileRemoteManipulation implements FileManipulation {
 	 * (non-Javadoc)
 	 * 
 	 * @see specs.FileManipulation#createFile(java.lang.String, java.lang.String,
-	 * users.User)
+	 * users.AbstractUser)
 	 */
 	@Override
-	public void createFile(String name, String path, User user) {
+	public void createFile(String name, String path, AbstractUser user) {
 		if (user.getPrivileges()[0]) {
 
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
@@ -73,10 +73,9 @@ public class FileRemoteManipulation implements FileManipulation {
 			if (i > 0) {
 				extension = c.getName().substring(i + 1);
 			}
-			for(String s : forbiddenExtensions) {
-				if(s.equalsIgnoreCase(extension))
-				{
-					System.out.println("File with extension  (." + extension + ") cannot be created!" );
+			for (String s : forbiddenExtensions) {
+				if (s.equalsIgnoreCase(extension)) {
+					System.out.println("File with extension  (." + extension + ") cannot be created!");
 					return;
 				}
 			}
@@ -107,7 +106,7 @@ public class FileRemoteManipulation implements FileManipulation {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("User does not have required privilage.");
+			System.out.println("AbstractUser does not have required privilage.");
 		}
 
 	}
@@ -115,11 +114,11 @@ public class FileRemoteManipulation implements FileManipulation {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see specs.FileManipulation#deleteFile(java.lang.String, users.User)
+	 * @see specs.FileManipulation#deleteFile(java.lang.String, users.AbstractUser)
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	public void deleteFile(String path, User user) {
+	public void deleteFile(String path, AbstractUser user) {
 		if (user.getPrivileges()[1]) {
 
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
@@ -135,7 +134,7 @@ public class FileRemoteManipulation implements FileManipulation {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("User does not have required privilage.");
+			System.out.println("AbstractUser does not have required privilage.");
 		}
 
 	}
@@ -144,10 +143,10 @@ public class FileRemoteManipulation implements FileManipulation {
 	 * (non-Javadoc)
 	 * 
 	 * @see specs.FileManipulation#uploadFile(java.lang.String, java.lang.String,
-	 * users.User)
+	 * users.AbstractUser)
 	 */
 	@Override
-	public void uploadFile(String selectedPath, String destinationPath, User user) {
+	public void uploadFile(String selectedPath, String destinationPath, AbstractUser user) {
 
 		if (user.getPrivileges()[2]) {
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
@@ -160,8 +159,8 @@ public class FileRemoteManipulation implements FileManipulation {
 				if (i > 0) {
 					extension = f.getName().substring(i + 1);
 				}
-				for(String s : forbiddenExtensions) {
-					if(s.equalsIgnoreCase(extension)) {
+				for (String s : forbiddenExtensions) {
+					if (s.equalsIgnoreCase(extension)) {
 						System.out.println("File with extension (." + extension + ") cannot be uploaded!");
 						return;
 					}
@@ -175,10 +174,10 @@ public class FileRemoteManipulation implements FileManipulation {
 					createMetaFile(user, name, extension, root);
 				}
 			} catch (Exception e) {
-				System.out.println("Wrong path!");
+				e.printStackTrace();
 			}
 		} else {
-			System.out.println("User does not have required privilage.");
+			System.out.println("AbstractUser does not have required privilage.");
 		}
 
 	}
@@ -187,10 +186,10 @@ public class FileRemoteManipulation implements FileManipulation {
 	 * (non-Javadoc)
 	 * 
 	 * @see specs.FileManipulation#downloadFile(java.lang.String, java.lang.String,
-	 * users.User)
+	 * users.AbstractUser)
 	 */
 	@Override
-	public void downloadFile(String selectedPath, String destinationPath, User user) {
+	public void downloadFile(String selectedPath, String destinationPath, AbstractUser user) {
 		if (user.getPrivileges()[3]) {
 			DbxClientV2 client = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 
@@ -220,7 +219,7 @@ public class FileRemoteManipulation implements FileManipulation {
 				e1.printStackTrace();
 			}
 		} else {
-			System.out.println("User does not have required privilage.");
+			System.out.println("AbstractUser does not have required privilage.");
 		}
 
 	}
@@ -233,7 +232,7 @@ public class FileRemoteManipulation implements FileManipulation {
 	 * @param fileType Type(extension) of the original file
 	 * @param filePath Path of the directory where file will be stored
 	 */
-	public void createMetaFile(User user, String fileName, String fileType, String filePath) {
+	public void createMetaFile(AbstractUser user, String fileName, String fileType, String filePath) {
 
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
 		Date date = new Date(System.currentTimeMillis());
@@ -273,7 +272,7 @@ public class FileRemoteManipulation implements FileManipulation {
 
 	@SuppressWarnings("static-access")
 	@Override
-	public void uploadMultipleFilesZip(String[] filePaths, String destinationPath, String zipName, User user) {
+	public void uploadMultipleFilesZip(String[] filePaths, String destinationPath, String zipName, AbstractUser user) {
 		FileUtil util = new FileUtil();
 		util.zipFiles(filePaths, "src", zipName);
 		System.out.println(root + destinationPath);
