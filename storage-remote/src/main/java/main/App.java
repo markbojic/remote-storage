@@ -26,6 +26,7 @@ import models.FileRemoteImplementation;
 import models.User;
 import specs.DirectoryManipulation;
 
+@SuppressWarnings({ "unused", "deprecation" })
 public class App {
 
 	public static final String ACCESS_TOKEN = "Gtb2Dvk8yKAAAAAAAAAAFLHGpRNZA0DT2z1NikOvWDJISMvOzJaSg48W2vzUQ1UI";
@@ -50,16 +51,16 @@ public class App {
 		 */
 
 		DirectoryRemoteImplementation m = new DirectoryRemoteImplementation();
-		
-		//boolean[] b = { true, true, true, true};
-		
-		//User u = new User("A", "AA");
-		
-		//m.initStorage("Novi Storage Buu", u);
-		//FileRemoteImplementation f = new FileRemoteImplementation();
-		//f.setRoot(m.getRoot());
-		///f.setForbiddenExtensions(m.getForbidden());
-		//System.out.println(f.getRoot() + " ---- " + f.getForbiddenExtensions()[0]);
+
+		// boolean[] b = { true, true, true, true};
+
+		// User u = new User("A", "AA");
+
+		// m.initStorage("Novi Storage Buu", u);
+		// FileRemoteImplementation f = new FileRemoteImplementation();
+		// f.setRoot(m.getRoot());
+		/// f.setForbiddenExtensions(m.getForbidden());
+		// System.out.println(f.getRoot() + " ---- " + f.getForbiddenExtensions()[0]);
 
 		// move("/Test.txt", "/PFFF.txt");
 		// TEST ZA KREIRANJE NOVOG
@@ -111,53 +112,53 @@ public class App {
 
 		// m.uploadDirectory(directoryPath, "", new User("A", "A", b));
 
-		//m.createDirectory("Folder", "", new User("A", "AA", b));
-		//f.createMetaFile(new User("A", "A", b), "JTest.txt", "txt", "/New Folder");
-		
-		//f.uploadFile("C:/New Folder/Test.txt", "", new User("A", "AA", b));
-		
-		//f.deleteFile("/Test.txt", new User("A", "AA", b));
-		//String[] ext = {"rar"};
-		
-		//m.initStorage("", "Remote Storage", ext, new User("C", "ASS", b));
-		
-		//User u = new User("C", "ASS");
-		//u.setPrivileges(b);
-		//u.setAdmin(true);
-		//m.initStorage("Remote Storage", ext, u);
-		//FileRemoteManipulation f = new FileRemoteManipulation();
-		//f.setForbiddenExtensions(ext);
-		//f.setRoot(m.getRoot());
-		//m.createDirectory("A", "", u);
-		//f.setForbiddenExtensions("");
-		
-		//m.downloadDirectory("New Folder", "C:/New Folder 1", u);
-		//m.listDirectories("New Folder");
-	//	m.listFiles("New Folder", "txt");
-		//m.listAllFiles("New Folder");
-		//u.listAllUsers(m.getRoot(), ACCESS_TOKEN);
-		//f.downloadFile("r.txt", "C:/New Folder 1", u);
-		//f.createFile("Mojfajl.txt", "", u);
-		//f.deleteFile("Mojfajl.txt", u);
-		//f.uploadFile("C:/New Folder 1/r.txt", "", u);
-	//	f.rewriteAccountLog("C:/New Folder/accounts.log",m.getRoot());
-	//	System.out.println(m.getRoot());
-		//u.createUser("NOVI", "A", b, m.getRoot(),ACCESS_TOKEN);
-		//u.createUser("Nikola", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
-	//	u.createUser("Nikola2", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
-	//	u.createUser("Nikola3", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
-	//	u.listAllUsers(m.getRoot(), ACCESS_TOKEN);
-		
-	//	m.uploadZipDirectory("C:/New Folder", "", u);
-		//u.deleteUser("Nikola", m.getRoot(), ACCESS_TOKEN);
-		//System.out.println(m.getRoot());
-		
-		//Test za upload zip multiple
-		//ArrayList<String> paths = new ArrayList<String>();
-		//paths.add("C:/New Folder/Test.txt");
-		//paths.add("C:/New Folder 1/r.txt");
-		//f.uploadMultipleFilesZip(paths, "", "Zipperoni", u);
-		
+		// m.createDirectory("Folder", "", new User("A", "AA", b));
+		// f.createMetaFile(new User("A", "A", b), "JTest.txt", "txt", "/New Folder");
+
+		// f.uploadFile("C:/New Folder/Test.txt", "", new User("A", "AA", b));
+
+		// f.deleteFile("/Test.txt", new User("A", "AA", b));
+		// String[] ext = {"rar"};
+
+		// m.initStorage("", "Remote Storage", ext, new User("C", "ASS", b));
+
+		// User u = new User("C", "ASS");
+		// u.setPrivileges(b);
+		// u.setAdmin(true);
+		// m.initStorage("Remote Storage", ext, u);
+		// FileRemoteManipulation f = new FileRemoteManipulation();
+		// f.setForbiddenExtensions(ext);
+		// f.setRoot(m.getRoot());
+		// m.createDirectory("A", "", u);
+		// f.setForbiddenExtensions("");
+
+		// m.downloadDirectory("New Folder", "C:/New Folder 1", u);
+		// m.listDirectories("New Folder");
+		// m.listFiles("New Folder", "txt");
+		// m.listAllFiles("New Folder");
+		// u.listAllUsers(m.getRoot(), ACCESS_TOKEN);
+		// f.downloadFile("r.txt", "C:/New Folder 1", u);
+		// f.createFile("Mojfajl.txt", "", u);
+		// f.deleteFile("Mojfajl.txt", u);
+		// f.uploadFile("C:/New Folder 1/r.txt", "", u);
+		// f.rewriteAccountLog("C:/New Folder/accounts.log",m.getRoot());
+		// System.out.println(m.getRoot());
+		// u.createUser("NOVI", "A", b, m.getRoot(),ACCESS_TOKEN);
+		// u.createUser("Nikola", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
+		// u.createUser("Nikola2", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
+		// u.createUser("Nikola3", "Mightrps", b, m.getRoot(), ACCESS_TOKEN);
+		// u.listAllUsers(m.getRoot(), ACCESS_TOKEN);
+
+		// m.uploadZipDirectory("C:/New Folder", "", u);
+		// u.deleteUser("Nikola", m.getRoot(), ACCESS_TOKEN);
+		// System.out.println(m.getRoot());
+
+		// Test za upload zip multiple
+		// ArrayList<String> paths = new ArrayList<String>();
+		// paths.add("C:/New Folder/Test.txt");
+		// paths.add("C:/New Folder 1/r.txt");
+		// f.uploadMultipleFilesZip(paths, "", "Zipperoni", u);
+
 	}
 
 	private static void move(String path, String dest) {

@@ -35,9 +35,17 @@ public class User extends AbstractUser {
 
 	public User(String username, String password) {
 		super(username, password);
-		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * Creates new user with given username, password and privileges for operations.
+	 * 
+	 * @param username Username of the user you wish to create
+	 * @param password Password of the user you wish to create
+	 * @param privs    User's privileges for creating, deleting, uploading and
+	 *                 downloading
+	 * @param root     Root directory of the storage
+	 */
 	@Override
 	public void createUser(String username, String password, boolean[] privs, String root) {
 		if (isAdmin()) {
@@ -135,9 +143,14 @@ public class User extends AbstractUser {
 
 	}
 
+	/**
+	 * Deletes user with given username.
+	 * 
+	 * @param username Username of the user you wish to delete
+	 * @param root     Root directory of the storage
+	 */
 	@Override
 	public void deleteUser(String username, String root) {
-		// TODO Auto-generated method stub
 		if (isAdmin()) {
 			DbxRequestConfig config = DbxRequestConfig.newBuilder(this.getUsername()).build();
 			DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
@@ -224,6 +237,11 @@ public class User extends AbstractUser {
 
 	}
 
+	/**
+	 * Displays a list of all users.
+	 * 
+	 * @param root Root directory of the storage
+	 */
 	@Override
 	public void listAllUsers(String root) {
 		if (isAdmin()) {

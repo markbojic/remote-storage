@@ -32,31 +32,10 @@ import users.AbstractUser;
 public class FileRemoteImplementation implements FileManipulation {
 
 	private String root;
-
 	private String[] forbiddenExtensions;
-
-	@Override
-	public String[] getForbiddenExtensions() {
-		return forbiddenExtensions;
-	}
-
-	@Override
-	public void setForbiddenExtensions(String[] forbiddenExtensions) {
-		this.forbiddenExtensions = forbiddenExtensions;
-	}
 
 	public FileRemoteImplementation() {
 		super();
-	}
-
-	@Override
-	public String getRoot() {
-		return root;
-	}
-
-	@Override
-	public void setRoot(String root) {
-		this.root = root;
 	}
 
 	/*
@@ -275,6 +254,14 @@ public class FileRemoteImplementation implements FileManipulation {
 
 	}
 
+	/**
+	 * Zips multiple files and uploads archive to storage.
+	 * 
+	 * @param filePaths       List of paths for files that will be uploaded
+	 * @param destinationPath Path where archive will be stored
+	 * @param zipName         Archive name
+	 * @param user            Current user
+	 */
 	@SuppressWarnings("static-access")
 	@Override
 	public void uploadMultipleFilesZip(String[] filePaths, String destinationPath, String zipName, AbstractUser user) {
@@ -287,5 +274,45 @@ public class FileRemoteImplementation implements FileManipulation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Gets array of forbidden extensions.
+	 * 
+	 * @return Array of forbidden extensions
+	 */
+	@Override
+	public String[] getForbiddenExtensions() {
+		return forbiddenExtensions;
+	}
+
+	/**
+	 * Used for setting forbidden extensions.
+	 * 
+	 * @param forbiddenExtensions Array of forbidden extensions
+	 */
+	@Override
+	public void setForbiddenExtensions(String[] forbiddenExtensions) {
+		this.forbiddenExtensions = forbiddenExtensions;
+	}
+
+	/**
+	 * Gets root's path.
+	 * 
+	 * @return Root path
+	 */
+	@Override
+	public String getRoot() {
+		return root;
+	}
+
+	/**
+	 * Used for setting root's path.
+	 * 
+	 * @param root Root path
+	 */
+	@Override
+	public void setRoot(String root) {
+		this.root = root;
 	}
 }
