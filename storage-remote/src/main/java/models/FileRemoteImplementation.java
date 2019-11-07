@@ -35,10 +35,12 @@ public class FileRemoteImplementation implements FileManipulation {
 
 	private String[] forbiddenExtensions;
 
+	@Override
 	public String[] getForbiddenExtensions() {
 		return forbiddenExtensions;
 	}
 
+	@Override
 	public void setForbiddenExtensions(String[] forbiddenExtensions) {
 		this.forbiddenExtensions = forbiddenExtensions;
 	}
@@ -47,10 +49,12 @@ public class FileRemoteImplementation implements FileManipulation {
 		super();
 	}
 
+	@Override
 	public String getRoot() {
 		return root;
 	}
 
+	@Override
 	public void setRoot(String root) {
 		this.root = root;
 	}
@@ -106,7 +110,7 @@ public class FileRemoteImplementation implements FileManipulation {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("AbstractUser does not have required privilage.");
+			System.out.println("User does not have required privilage.");
 		}
 
 	}
@@ -134,7 +138,7 @@ public class FileRemoteImplementation implements FileManipulation {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("AbstractUser does not have required privilage.");
+			System.out.println("User does not have required privilage.");
 		}
 
 	}
@@ -173,11 +177,12 @@ public class FileRemoteImplementation implements FileManipulation {
 					FileMetadata metadata = client.files().uploadBuilder(root + "/" + name).uploadAndFinish(in);
 					createMetaFile(user, name, extension, root);
 				}
+				in.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("AbstractUser does not have required privilage.");
+			System.out.println("User does not have required privilage.");
 		}
 
 	}
@@ -219,7 +224,7 @@ public class FileRemoteImplementation implements FileManipulation {
 				e1.printStackTrace();
 			}
 		} else {
-			System.out.println("AbstractUser does not have required privilage.");
+			System.out.println("User does not have required privilage.");
 		}
 
 	}
@@ -258,7 +263,7 @@ public class FileRemoteImplementation implements FileManipulation {
 				File f = new File(json);
 				String name = f.getName();
 				FileMetadata metadata = client.files().uploadBuilder(filePath + "/" + name).uploadAndFinish(in);
-
+				in.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -275,7 +280,7 @@ public class FileRemoteImplementation implements FileManipulation {
 	public void uploadMultipleFilesZip(String[] filePaths, String destinationPath, String zipName, AbstractUser user) {
 		FileUtil util = new FileUtil();
 		util.zipFiles(filePaths, "src", zipName);
-		System.out.println(root + destinationPath);
+		System.out.println("Uploading files to : " + root + destinationPath);
 		uploadFile("src/" + zipName + ".zip", destinationPath, user);
 		try {
 			Files.deleteIfExists(Paths.get("src/" + zipName + ".zip"));

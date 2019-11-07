@@ -44,23 +44,16 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 	 * @param root
 	 */
 	private String root;
-	private String[] forbidden;//Saamo za uplaod zip
+	private String[] forbiddenExtensions;//Saamo za uplaod zip
 	private static final String ACCESS_TOKEN = "Gtb2Dvk8yKAAAAAAAAAAFLHGpRNZA0DT2z1NikOvWDJISMvOzJaSg48W2vzUQ1UI";
 	
 	
 
-	public String[] getForbidden() {
-		return forbidden;
-	}
-
-	public void setForbidden(String[] forbidden) {
-		this.forbidden = forbidden;
-	}
-
+	@Override
 	public String getRoot() {
 		return root;
 	}
-
+	@Override
 	public void setRoot(String root) {
 		this.root = root;
 	}
@@ -90,7 +83,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 				e1.printStackTrace();
 			}
 		} else {
-			System.out.println("AbstractUser does not have required privilage.");
+			System.out.println("User does not have required privilage.");
 		}
 	}
 
@@ -115,7 +108,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 				e1.printStackTrace();
 			}
 		} else {
-			System.out.println("AbstractUser does not have required privilage.");
+			System.out.println("User does not have required privilage.");
 		}
 
 	}
@@ -137,8 +130,8 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 
 			try {
 				if(!destinationPath.equals("")){
-				client.files().createFolderV2(destinationPath + "/" + local.getName());
-				cale = destinationPath + "/" + local.getName();// F1
+				client.files().createFolderV2(getRoot() + "/" + destinationPath + "/" + local.getName());
+				cale = root + "/" +destinationPath + "/" + local.getName();// F1
 				}
 				else
 				{
@@ -173,7 +166,8 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 				}
 			}
 		}
-		System.out.println("AbstractUser does not have required privilage!");
+		else
+			System.out.println("User does not have required privilage!");
 
 	}
 
@@ -203,7 +197,8 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 				System.out.println("Invalid path parameter!");
 			}
 		}
-		System.out.println("AbstractUser does not have required privilage!");
+		else
+			System.out.println("User does not have required privilage!");
 
 	}
 
@@ -420,7 +415,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 		util.zipDirectory(new File(path), "src", name);
 		FileRemoteImplementation fr = new FileRemoteImplementation();
 		fr.setRoot(root);
-		fr.setForbiddenExtensions(forbidden);
+		fr.setForbiddenExtensions(forbiddenExtensions);
 		fr.uploadFile("src/" + name + ".zip", destination, user);
 		try {
 			Files.deleteIfExists(Paths.get("src/" + name + ".zip"));
@@ -560,7 +555,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 									line = br2.readLine();
 								}
 								String[] splitExts = extensions.split(" ");
-								this.setForbidden(splitExts);
+								this.setForbiddenExtensions(splitExts);
 								br2.close();
 							} catch (IOException ex) {
 								ex.printStackTrace();
@@ -591,11 +586,11 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 						user.setAdmin(true);
 						user.setPrivileges(p);
 						System.out.println("Enter forbidden extensions: ");
-						Scanner sc = new Scanner(System.in);
-						String extensionsStr = sc.nextLine();
+						Scanner sc1 = new Scanner(System.in);
+						String extensionsStr = sc1.nextLine();
 						String[] extensionArray = extensionsStr.split(" ");
 						initStorageNew(storageName, user, extensionArray);
-						sc.close();
+						sc1.close();
 					}
 		
 	}
@@ -631,7 +626,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 			//Set the root field to the new Storage path on dropbox
 			setRoot("/" + storageName);
 			//Set forbiidenExtension for the new Storage
-			setForbidden(extensions);
+			setForbiddenExtensions(extensions);
 			System.out.println("Root set to : " + getRoot());
 		} catch (DbxException e) {
 			e.printStackTrace();
@@ -703,5 +698,16 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void setForbiddenExtensions(String[] forbiddenExtensions) {
+		this.forbiddenExtensions = forbiddenExtensions;
+		
+	}
+
+	@Override
+	public String[] getForbiddenExtensions() {
+		return this.forbiddenExtensions;
 	}
 }
