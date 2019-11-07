@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 import specs.DirectoryManipulation;
@@ -399,7 +400,8 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 			writer = new PrintWriter(fileAccs);
 			writer.print("");
 			writer.close();
-		} catch (FileNotFoundException e) {
+			Files.deleteIfExists(Paths.get(fileAccs.getAbsolutePath()));
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -506,6 +508,12 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
+						try {
+							Files.deleteIfExists(Paths.get(c.getAbsolutePath()));
+						} catch (IOException e2) {
+							// TODO Auto-generated catch block
+							e2.printStackTrace();
+						}
 
 						//Get storage info, check if user is Admin and what are the forbidden extensions
 						File c1 = new File("src" + "/" + "storage-info.txt");
@@ -574,7 +582,12 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-
+						try {
+							Files.deleteIfExists(Paths.get(c1.getAbsolutePath()));
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					} 
 					//If the sorage with that name does not exist, then make a new Storage with aall the required files
 					else {
@@ -590,7 +603,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 						String extensionsStr = sc1.nextLine();
 						String[] extensionArray = extensionsStr.split(" ");
 						initStorageNew(storageName, user, extensionArray);
-						sc1.close();
+						//sc1.close();
 					}
 		
 	}
