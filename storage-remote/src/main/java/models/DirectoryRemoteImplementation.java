@@ -315,7 +315,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 	 *                            will be set to the value of the wanted storage
 	 *                            with the given storage name
 	 */
-	public void initStorage(String storageName, String[] forbiddenExtensions, AbstractUser user) {
+	public void makeStorage(String storageName, String[] forbiddenExtensions, AbstractUser user) {
 
 		DbxClientV2 client1 = SdkUtil.createTestDbxClientV2(App.ACCESS_TOKEN);
 		ListFolderResult result;
@@ -480,10 +480,8 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 											boolean priv3 = splitter[4].equals("true") ? true : false;
 											boolean priv4 = splitter[5].equals("true") ? true : false;
 											boolean[] niz = { priv1, priv2, priv3, priv4 };
-											//user = new AbstractUser(user., password, niz);
-											user.setPrivileges(niz);
-											//remoteSt.setRoot("/" + storageName);// Postavi root da bude taj storage
-											setRoot("/" + storageName);
+											user.setPrivileges(niz);//Set privilages of the user that logged in
+											setRoot("/" + storageName);//Set root of the chosen storage
 											System.out.println("Remote root set to : " + getRoot());
 											reader.close();
 											ex = true;
@@ -514,6 +512,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 							e.printStackTrace();
 						}
 
+						//Get storage info, check if user is Admin and what are the forbidden extensions
 						File c1 = new File("src" + "/" + "storage-info.txt");
 						try {
 							c1.createNewFile();
@@ -539,7 +538,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 								String line = reader.readLine();
 								while (line != null) {
 									if (line.trim().equalsIgnoreCase(user.getUsername())) {
-										user.setAdmin(true);
+										user.setAdmin(true);//If user is admin then set the admin to true
 									}
 									line = reader.readLine();
 								}
@@ -554,6 +553,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 								br2.readLine(); // preskoci prvu liniju
 								String line = br2.readLine();
 								String extensions = "";
+								//Read nad set the forbiddent extensions already existing for the chosen storage
 								while (line != null) {
 									extensions = extensions + " " + line;
 									System.out.println("FE -> " + line);
@@ -567,6 +567,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 							}
 
 							// Files.deleteIfExists(Paths.get(c1.getAbsolutePath()));
+							//Empty the used file for storage-info
 							PrintWriter writer;
 							try {
 								writer = new PrintWriter(c1);
@@ -579,19 +580,21 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 							e.printStackTrace();
 						}
 
-					} else {
+					} 
+					//If the sorage with that name does not exist, then make a new Storage with aall the required files
+					else {
 						// Pravi novi storage
 						System.out.println("Storage does not exist, enter the forbidden extension for the new storage: ");
 						boolean p[] = { true, true, true, true };
 					//	user = new AbstractUser(username, password, p);
+						//Set the user privilages to all and make the user Admin of the new Storage
 						user.setAdmin(true);
 						user.setPrivileges(p);
 						System.out.println("Enter forbidden extensions: ");
 						Scanner sc = new Scanner(System.in);
 						String extensionsStr = sc.nextLine();
 						String[] extensionArray = extensionsStr.split(" ");
-						System.out.println(user.getUsername() + " " + user.getPassword() + " " + user.getPrivileges());
-						System.out.println("New storage root set to " + getRoot());
+						initStorageNew(storageName, user, extensionArray);
 						sc.close();
 					}
 		
@@ -619,8 +622,86 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 	}
 
 
-	public void initStorageNew(String storageName, AbstractUser user) {//Log in sa sve inicijalizaciiji0km
-		// TODO Auto-generated method stub
+	public void initStorageNew(String storageName, AbstractUser user, String extensions[]) {//Log in sa sve inicijalizaciiji0km
+		DbxRequestConfig config = DbxRequestConfig.newBuilder("storage").build();
+		DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+		//Make new sotrage Folder on the dropbox path
+		try {
+			client.files().createFolderV2("/" + storageName);
+			//Set the root field to the new Storage path on dropbox
+			setRoot("/" + storageName);
+			//Set forbiidenExtension for the new Storage
+			setForbidden(extensions);
+			System.out.println("Root set to : " + getRoot());
+		} catch (DbxException e) {
+			e.printStackTrace();
+		}
 		
+		//Make storage-info.txt file, write the extensions here
+		File fileInfo = new File("src/storage-info.txt");
+		try {
+			FileOutputStream fos = new FileOutputStream(fileInfo, true);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+			bw.write(user.getUsername());//Write admin name
+			bw.newLine();
+			for (int i = 0; i < extensions.length; i++) {//Write extensions list
+				bw.write(extensions[i]);
+				bw.newLine();
+			}
+			bw.close();
+			System.out.println("User : " + user.getUsername() + " /" + user.getPassword() + " /" + user.getPrivileges() + "created!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		//Upload the storage-info.txt to the dropbox/New Storage
+		try (InputStream in = new FileInputStream(fileInfo.getAbsolutePath())) {
+			String name = fileInfo.getName();
+			FileMetadata metadata = client.files().uploadBuilder(getRoot() + "/" + name).uploadAndFinish(in);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		//Delete storage-info file in local memory
+		try {
+			Files.deleteIfExists(Paths.get(fileInfo.getAbsolutePath()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		//Make accounts.log file
+		File fileAccs = new File("src/accounts.log");
+		try {
+			FileOutputStream fos = new FileOutputStream(fileAccs, true);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+			bw.write(user.getUsername() + "/" + user.getPassword() + "/" + true + "/" + true + "/" + true + "/" + true);
+			bw.newLine();
+			bw.close();
+			fos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		//Upload accounts.log to the new storage path (dropbox/NewStorage)
+		try (InputStream in = new FileInputStream(fileAccs.getAbsolutePath())) {
+			String name = fileAccs.getName();
+			FileMetadata metadata = client.files().uploadBuilder(getRoot() + "/" + name).uploadAndFinish(in);
+			in.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// Delete the accounts.log file from local memory
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(fileAccs);
+			writer.print("");
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		try {
+			Files.deleteIfExists(Paths.get(fileAccs.getAbsolutePath()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

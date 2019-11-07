@@ -51,7 +51,15 @@ public class App {
 
 		DirectoryRemoteImplementation m = new DirectoryRemoteImplementation();
 		
-		boolean[] b = { true, true, true, true};
+		//boolean[] b = { true, true, true, true};
+		
+		//User u = new User("A", "AA");
+		
+		//m.initStorage("Novi Storage Buu", u);
+		//FileRemoteImplementation f = new FileRemoteImplementation();
+		//f.setRoot(m.getRoot());
+		///f.setForbiddenExtensions(m.getForbidden());
+		//System.out.println(f.getRoot() + " ---- " + f.getForbiddenExtensions()[0]);
 
 		// move("/Test.txt", "/PFFF.txt");
 		// TEST ZA KREIRANJE NOVOG
