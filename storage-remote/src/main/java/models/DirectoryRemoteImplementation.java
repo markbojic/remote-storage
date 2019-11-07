@@ -495,7 +495,7 @@ public class DirectoryRemoteImplementation implements DirectoryManipulation {
 			try {
 				Files.deleteIfExists(Paths.get(c.getAbsolutePath()));
 			} catch (IOException e2) {
-				e2.printStackTrace();
+				//e2.printStackTrace();
 			}
 
 			// Get storage info, check if user is Admin and what are the forbidden
